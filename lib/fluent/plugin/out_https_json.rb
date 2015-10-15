@@ -4,8 +4,7 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
   Fluent::Plugin.register_output('https_json', self)
 
   def initialize
-    require 'net/http'
-    require 'net/https'
+    require 'net/http/persistent'
     require 'uri'
     super
   end
@@ -16,10 +15,7 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
   def configure(conf)
     super
     @uri = URI.parse(conf['endpoint'])
-    @http = Net::HTTP.new(@uri.host,@uri.port)
-    @https = Net::HTTP.new(@uri.host,@uri.port)
-    @https.use_ssl = true
-    @use_https = conf['use_https'] == 'true'
+    @http = Net::HTTP::Persistent.new()
   end
 
   # This method is called when starting.
@@ -52,11 +48,7 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
     events = events.to_json
     req = Net::HTTP::Post.new(@uri.path)
     req.set_form_data({"events" => events})
-    if @use_https
-      res = @https.request(req)
-    else
-      res = @http.request(req)
-    end
+    res = @http.request(req)
   end
 
 end
