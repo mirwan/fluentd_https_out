@@ -15,7 +15,14 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
   def configure(conf)
     super
     @uri = URI.parse(conf['endpoint'])
+
+    config_param :remove_prefix, :string, :default => nil
     @http = Net::HTTP::Persistent.new()
+    if conf['remove_prefix']
+      @remove_prefix = conf['remove_prefix']
+      @remove_prefix_string = @remove_prefix + '.'
+      @remove_prefix_length = @remove_prefix_string.length
+    end
   end
 
   # This method is called when starting.
@@ -32,6 +39,9 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
 
   ## Optionally, you can use to_msgpack to serialize the object.
   def format(tag, time, record)
+    if tag == @remove_prefix or @remove_prefix and (tag[0, @remove_prefix_length] == @remove_prefix_string and tag.length > @remove_prefix_length)
+      tag = tag[@remove_prefix_length..-1]
+    end 
     [tag, time, record].to_msgpack
   end
 
