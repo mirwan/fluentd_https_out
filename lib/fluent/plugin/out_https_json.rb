@@ -16,7 +16,6 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
     super
     @uri = URI conf['endpoint']
 
-    @http = Net::HTTP::Persistent.new()
     if conf['remove_prefix']
       @remove_prefix = conf['remove_prefix']
       @remove_prefix_string = @remove_prefix + '.'
@@ -28,12 +27,14 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
   # Open sockets or files here.
   def start
     super
+    @http = Net::HTTP::Persistent.new()
   end
 
   # This method is called when shutting down.
   # Shutdown the thread and close sockets or files here.
   def shutdown
     super
+    @http.shutdown
   end
 
   ## Optionally, you can use to_msgpack to serialize the object.
@@ -57,7 +58,7 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
     events = events.to_json
     req = Net::HTTP::Post.new(@uri.path)
     req.set_form_data({"events" => events})
-    res = @http.request(req)
+    res = @http.request(@uri, req)
   end
 
 end
