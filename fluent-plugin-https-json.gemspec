@@ -17,6 +17,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "bundler"
   gem.add_development_dependency "json"
   gem.add_development_dependency "fluentd"
+  gem.add_development_dependency "net-http-persistent"
   gem.add_runtime_dependency "fluentd"
   gem.add_runtime_dependency "net-http-persistent"
 end
