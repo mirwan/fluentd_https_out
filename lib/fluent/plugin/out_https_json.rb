@@ -14,9 +14,8 @@ class Fluent::HttpsJsonOutput < Fluent::TimeSlicedOutput
   # If the configuration is invalid, raise Fluent::ConfigError.
   def configure(conf)
     super
-    @uri = URI.parse(conf['endpoint'])
+    @uri = URI conf['endpoint']
 
-    config_param :remove_prefix, :string, :default => nil
     @http = Net::HTTP::Persistent.new()
     if conf['remove_prefix']
       @remove_prefix = conf['remove_prefix']
